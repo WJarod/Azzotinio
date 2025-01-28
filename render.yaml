@@ -1,9 +1,15 @@
 services:
-  - type: web
-    name: my-app
-    env: node
-    buildCommand: 'npm install'
-    startCommand: 'npm run A'
-    plan: free  # Choisis le plan, par exemple `free`, `starter`, ou `pro` (en fonction de tes besoins)
-    branches: 
-      - main  # Si tu veux déployer à partir de la branche principale
+  - name: my-node-app  # Nom unique pour ton service
+    type: web  # Type de service : web, worker, cron, etc.
+    runtime: node  # Runtime : Node.js pour ton projet
+    plan: starter  # Plan d'abonnement (starter, pro, etc.)
+    buildCommand: 'npm install'  # Commande pour installer les dépendances
+    startCommand: 'npm run A'  # Commande pour démarrer ton app
+    region: frankfurt  # Région de déploiement
+    repo: https://github.com/WJarod/Azzotinio  # Lien vers ton dépôt GitHub/GitLab
+    branch: main  # Branche du dépôt à utiliser
+    domains:
+      - my-app.onrender.com  # Domaine de ton service (subdomian par défaut)
+      - www.mon-app.com  # Si tu utilises un domaine personnalisé
+    healthCheckPath: /health  # Vérification de la santé du service
+    maxShutdownDelaySeconds: 60  # Délai de fermeture maximale en secondes
