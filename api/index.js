@@ -17,8 +17,16 @@ app.get("/api/calculate", (req, res) => {
   if (!salary) {
     return res.status(400).json({ error: "Invalid salary" });
   }
-  const secondsPerMonth = 30 * 24 * 60 * 60; // Approximatif : 30 jours
-  const incomePerSecond = salary / secondsPerMonth;
+
+  const hoursPerWeek = 35; // 35 heures par semaine
+  const weeksPerMonth = 4.33; // Moyenne de semaines par mois
+  const secondsPerHour = 3600; // Nombre de secondes dans une heure
+  
+  // Calcul des secondes totales travaillées dans un mois
+  const totalSecondsPerMonth = hoursPerWeek * weeksPerMonth * secondsPerHour;
+  
+  // Calcul du revenu par seconde
+  const incomePerSecond = salary / totalSecondsPerMonth;
 
   res.json({ incomePerSecond });
 });
