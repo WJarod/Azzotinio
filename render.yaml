@@ -1,0 +1,9 @@
+services:
+  - type: web
+    name: my-app
+    env: node
+    buildCommand: 'npm install'
+    startCommand: 'npm run A'
+    plan: free  # Choisis le plan, par exemple `free`, `starter`, ou `pro` (en fonction de tes besoins)
+    branches: 
+      - main  # Si tu veux déployer à partir de la branche principale
