@@ -1,9 +1,13 @@
 const express = require("express");
 const app = express();
-const PORT = process.env.PORT || 3000;
+const path = require("path");
 
+// Configurer EJS pour les vues
 app.set("view engine", "ejs");
-app.use(express.static("public"));
+app.set("views", path.join(__dirname, "../views")); // Indiquer où se trouvent les vues
+
+// Middleware pour les fichiers statiques
+app.use(express.static(path.join(__dirname, "../public"))); // Gérer les fichiers CSS, JS, images, etc.
 
 // Route principale
 app.get("/", (req, res) => {
@@ -18,15 +22,15 @@ app.get("/", (req, res) => {
 // Route API pour le calcul du revenu
 app.get("/api/calculate", (req, res) => {
   try {
-    const salary = parseFloat(req.query.salary); 
+    const salary = parseFloat(req.query.salary);
     if (!salary) {
       return res.status(400).json({ error: "Invalid salary" });
     }
 
-    const hoursPerWeek = 35; 
-    const weeksPerMonth = 4.33; 
-    const secondsPerHour = 3600; 
-    
+    const hoursPerWeek = 35;
+    const weeksPerMonth = 4.33;
+    const secondsPerHour = 3600;
+
     const totalSecondsPerMonth = hoursPerWeek * weeksPerMonth * secondsPerHour;
     const incomePerSecond = salary / totalSecondsPerMonth;
 
@@ -37,6 +41,5 @@ app.get("/api/calculate", (req, res) => {
   }
 });
 
-app.listen(PORT, () => {
-  console.log(`Server running at http://localhost:${PORT}`);
-});
+// Exporter l'application Express pour Vercel
+module.exports = app;
