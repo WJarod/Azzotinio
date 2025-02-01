@@ -61,29 +61,26 @@ app.get("/api/generate-video", async (req, res) => {
       return res.status(400).json({ error: "Invalid salary" });
     }
 
-    const incomePerSecond = salary / (35 * 4.33 * 3600);
-    const totalIncome = (incomePerSecond * 10).toFixed(2); // Revenu en 10 secondes
+    const incomePerSecond = salary / (35 * 4.33 * 3600);  // Revenu par seconde
+    const duration = 10;  // Durée de la vidéo en secondes
 
-    // Génération de la vidéo avec texte via Cloudinary
-    const result = await cloudinary.uploader.upload("https://res.cloudinary.com/demo/video/upload/dog.mp4", {
-      resource_type: "video",
-      eager: [
-        { 
-          width: 800, 
-          height: 400, 
-          crop: "pad", 
-          overlay: {
-            font_family: "Arial",
-            font_size: 40,
-            text: `Revenu en 10s: ${totalIncome} €`
-          }, 
-          gravity: "south",
-          color: "#ffffff"
-        }
+    // Génération du texte pour chaque seconde
+    let textOverlay = '';
+    for (let i = 0; i <= duration; i++) {
+      const income = (incomePerSecond * i).toFixed(2);
+      textOverlay += `/l_text:Arial_40_bold:Temps ${i}s - Revenu: ${income}€,co_rgb:ffffff,g_center,y_${50 + i * 50}/`;
+    }
+
+    // Génération de la vidéo avec Cloudinary
+    const videoUrl = cloudinary.url('blank', {
+      resource_type: 'video',
+      transformation: [
+        { width: 800, height: 400, crop: "pad", background: "black" },
+        ...textOverlay.split('/').filter(Boolean).map(overlay => ({ overlay }))
       ]
     });
 
-    res.json({ videoUrl: result.secure_url });
+    res.json({ videoUrl });
 
   } catch (error) {
     console.error("Error generating video:", error);
