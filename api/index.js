@@ -1,8 +1,6 @@
 const express = require("express");
 const app = express();
 const path = require("path");
-const { createCanvas } = require('canvas');
-const ffmpeg = require('fluent-ffmpeg');
 const fs = require('fs');
 
 // Configurer EJS pour les vues
@@ -13,12 +11,16 @@ app.set("views", path.join(__dirname, "../views")); // Indiquer où se trouvent 
 app.use(express.static(path.join(__dirname, "../public"))); // Gérer les fichiers CSS, JS, images, etc.
 
 require('dotenv').config();
+
 const Mux = require('@mux/mux-node');
 
 const { Video } = new Mux({
-  accessToken: process.env.MUX_ACCESS_TOKEN,
-  secret: process.env.MUX_SECRET_KEY
+  tokenId: process.env.MUX_TOKEN_ID,
+  tokenSecret: process.env.MUX_TOKEN_SECRET
 });
+
+console.log('MUX_TOKEN_ID:', process.env.MUX_TOKEN_ID);
+console.log('MUX_TOKEN_SECRET:', process.env.MUX_TOKEN_SECRET);
 
 // Route principale
 app.get("/", (req, res) => {
