@@ -11,14 +11,14 @@ app.set("views", path.join(__dirname, "../views")); // Indiquer où se trouvent 
 app.use(express.static(path.join(__dirname, "../public"))); // Gérer les fichiers CSS, JS, images, etc.
 
 require('dotenv').config();
-const Mux = require('@mux/mux-node');
+const { Mux } = require('@mux/mux-node');
 
 const muxClient = new Mux({
   tokenId: process.env.MUX_TOKEN_ID,
   tokenSecret: process.env.MUX_TOKEN_SECRET
 });
 
-const { Video } = muxClient;
+const Video = muxClient.video;
 
 console.log('MUX_TOKEN_ID:', process.env.MUX_TOKEN_ID);
 console.log('MUX_TOKEN_SECRET:', process.env.MUX_TOKEN_SECRET);
