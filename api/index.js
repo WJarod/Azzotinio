@@ -59,35 +59,22 @@ app.get("/api/generate-video", async (req, res) => {
       return res.status(400).json({ error: "Invalid salary" });
     }
 
-    const incomePerSecond = salary / (35 * 4.33 * 3600);  
-    const duration = 10;  
+    const incomePerSecond = salary / (35 * 4.33 * 3600);  // Revenu par seconde
+    const duration = 10;  // Durée de la vidéo en secondes
 
-    const imageUrls = [];
-
-    for (let i = 0; i <= duration; i++) {
+    // Génération d'un fichier texte décrivant la vidéo
+    const videoScript = Array.from({ length: duration + 1 }, (_, i) => {
       const income = (incomePerSecond * i).toFixed(2);
-      const text = `Temps : ${i}s - Revenu : ${income}€`;
+      return `Temps: ${i}s - Revenu: ${income}€`;
+    }).join('\n');
 
-      // Génération d'une image sur Cloudinary
-      const result = await cloudinary.uploader.upload(
-        "https://res.cloudinary.com/demo/image/upload/black.jpg", {
-          transformation: [
-            { width: 800, height: 400, crop: "pad", background: "black" },
-            { overlay: { font_family: "Arial", font_size: 40, text: text }, gravity: "center", color: "white" }
-          ]
-        }
-      );
-
-      imageUrls.push(result.secure_url);
-    }
-
-    // Créer l'Asset vidéo sur Mux avec les images
+    // Créer un asset vidéo vide sur Mux
     const asset = await Video.Assets.create({
-      input: imageUrls,
+      input: "https://storage.googleapis.com/muxdemofiles/mux-video-intro.mp4",
       playback_policy: 'public'
     });
 
-    // Attendre que la vidéo soit prête
+    // Générer le lien de lecture
     const playbackUrl = `https://stream.mux.com/${asset.playback_ids[0].id}.mp4`;
 
     res.json({ videoUrl: playbackUrl });
