@@ -10,16 +10,16 @@
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&display=swap" rel="stylesheet">
   <style>
     body {
-      background-color: black; /* Fond vert */
+      background-color: black;
       color: white;
-      font-family: 'Courier New', Courier, monospace; /* Police par défaut */
+      font-family: 'Courier New', Courier, monospace;
       height: 100vh;
       margin: 0;
       display: flex;
       flex-direction: column;
     }
     .navbar {
-      background-color: #000; /* Fond noir */
+      background-color: #000;
       height: 70px;
       display: flex;
       align-items: center;
@@ -31,14 +31,17 @@
       gap: 10px;
     }
     #countdown {
-      font-size: 6rem; /* Taille plus grande */
+      font-size: 6rem;
       text-align: center;
       margin-top: auto;
       margin-bottom: auto;
-      font-family: 'Orbitron', sans-serif; /* Police horloge */
-      background-color: black; /* Fond noir */
-      color: #2ecc71; /* Texte vert */
-      font-weight: bold; /* Texte en gras */
+      font-family: 'Orbitron', sans-serif;
+      background-color: black;
+      color: #2ecc71;
+      font-weight: bold;
+    }
+    .btn-video {
+      margin-left: 10px;
     }
   </style>
 </head>
@@ -54,6 +57,7 @@
         required 
       />
       <button type="submit" class="btn btn-light">Valider</button>
+      <button type="button" class="btn btn-success btn-video" onclick="generateVideo()">Générer Vidéo</button>
     </form>
   </div>
 
@@ -97,6 +101,18 @@
         totalSeconds--; // Réduction du compteur de temps
       }, 1000); // Mise à jour toutes les 1 seconde
     });
+
+    // Fonction pour générer la vidéo
+    function generateVideo() {
+      const salary = document.getElementById('salary').value;
+      if (!salary) {
+        alert('Veuillez entrer un salaire valide.');
+        return;
+      }
+
+      // Redirige vers l'API pour télécharger la vidéo
+      window.location.href = `/api/generate-video?salary=${salary}`;
+    }
   </script>
 </body>
 </html>
