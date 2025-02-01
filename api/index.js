@@ -13,13 +13,11 @@ app.set("views", path.join(__dirname, "../views")); // Indiquer où se trouvent 
 app.use(express.static(path.join(__dirname, "../public"))); // Gérer les fichiers CSS, JS, images, etc.
 
 require('dotenv').config();
-const cloudinary = require('cloudinary').v2;
+const Mux = require('@mux/mux-node');
 
-// Configuration de Cloudinary
-cloudinary.config({
-  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-  api_key: process.env.CLOUDINARY_API_KEY,
-  api_secret: process.env.CLOUDINARY_API_SECRET
+const { Video } = new Mux({
+  accessToken: process.env.MUX_ACCESS_TOKEN,
+  secret: process.env.MUX_SECRET_KEY
 });
 
 // Route principale
@@ -61,26 +59,38 @@ app.get("/api/generate-video", async (req, res) => {
       return res.status(400).json({ error: "Invalid salary" });
     }
 
-    const incomePerSecond = salary / (35 * 4.33 * 3600);  // Revenu par seconde
-    const duration = 10;  // Durée de la vidéo en secondes
+    const incomePerSecond = salary / (35 * 4.33 * 3600);  
+    const duration = 10;  
 
-    // Génération du texte pour chaque seconde
-    let textOverlay = '';
+    const imageUrls = [];
+
     for (let i = 0; i <= duration; i++) {
       const income = (incomePerSecond * i).toFixed(2);
-      textOverlay += `/l_text:Arial_40_bold:Temps ${i}s - Revenu: ${income}€,co_rgb:ffffff,g_center,y_${50 + i * 50}/`;
+      const text = `Temps : ${i}s - Revenu : ${income}€`;
+
+      // Génération d'une image sur Cloudinary
+      const result = await cloudinary.uploader.upload(
+        "https://res.cloudinary.com/demo/image/upload/black.jpg", {
+          transformation: [
+            { width: 800, height: 400, crop: "pad", background: "black" },
+            { overlay: { font_family: "Arial", font_size: 40, text: text }, gravity: "center", color: "white" }
+          ]
+        }
+      );
+
+      imageUrls.push(result.secure_url);
     }
 
-    // Génération de la vidéo avec Cloudinary
-    const videoUrl = cloudinary.url('blank', {
-      resource_type: 'video',
-      transformation: [
-        { width: 800, height: 400, crop: "pad", background: "black" },
-        ...textOverlay.split('/').filter(Boolean).map(overlay => ({ overlay }))
-      ]
+    // Créer l'Asset vidéo sur Mux avec les images
+    const asset = await Video.Assets.create({
+      input: imageUrls,
+      playback_policy: 'public'
     });
 
-    res.json({ videoUrl });
+    // Attendre que la vidéo soit prête
+    const playbackUrl = `https://stream.mux.com/${asset.playback_ids[0].id}.mp4`;
+
+    res.json({ videoUrl: playbackUrl });
 
   } catch (error) {
     console.error("Error generating video:", error);

@@ -132,28 +132,28 @@
 
       // Fonction pour générer la vidéo
       async function generateVideo() {
-        const salary = document.getElementById("salary").value;
-        if (!salary) {
-          alert("Veuillez entrer un salaire valide.");
-          return;
-        }
+  const salary = document.getElementById('salary').value;
+  if (!salary) {
+    alert('Veuillez entrer un salaire valide.');
+    return;
+  }
 
-        const response = await fetch(`/api/generate-video?salary=${salary}`);
-        const data = await response.json();
+  const response = await fetch(`/api/generate-video?salary=${salary}`);
+  const data = await response.json();
 
-        if (data.error) {
-          alert(data.error);
-          return;
-        }
+  if (data.error) {
+    alert(data.error);
+    return;
+  }
 
-        // Création d'un lien temporaire pour télécharger la vidéo
-        const link = document.createElement("a");
-        link.href = data.videoUrl;
-        link.download = "revenu_video.mp4"; // Nom du fichier téléchargé
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-      }
+  // Téléchargement automatique de la vidéo
+  const link = document.createElement('a');
+  link.href = data.videoUrl;
+  link.download = 'revenu_video.mp4';
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+}
     </script>
   </body>
 </html>
