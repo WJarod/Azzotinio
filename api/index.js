@@ -11,13 +11,14 @@ app.set("views", path.join(__dirname, "../views")); // Indiquer où se trouvent 
 app.use(express.static(path.join(__dirname, "../public"))); // Gérer les fichiers CSS, JS, images, etc.
 
 require('dotenv').config();
-
 const Mux = require('@mux/mux-node');
 
-const { Video } = new Mux({
+const muxClient = new Mux({
   tokenId: process.env.MUX_TOKEN_ID,
   tokenSecret: process.env.MUX_TOKEN_SECRET
 });
+
+const { Video } = muxClient;
 
 console.log('MUX_TOKEN_ID:', process.env.MUX_TOKEN_ID);
 console.log('MUX_TOKEN_SECRET:', process.env.MUX_TOKEN_SECRET);
@@ -61,22 +62,18 @@ app.get("/api/generate-video", async (req, res) => {
       return res.status(400).json({ error: "Invalid salary" });
     }
 
-    const incomePerSecond = salary / (35 * 4.33 * 3600);  // Revenu par seconde
-    const duration = 10;  // Durée de la vidéo en secondes
+    const incomePerSecond = salary / (35 * 4.33 * 3600);
+    const duration = 10;
 
-    // Génération d'un fichier texte décrivant la vidéo
-    const videoScript = Array.from({ length: duration + 1 }, (_, i) => {
-      const income = (incomePerSecond * i).toFixed(2);
-      return `Temps: ${i}s - Revenu: ${income}€`;
-    }).join('\n');
+    // Vérifier si l'objet Video est bien initialisé
+    console.log('Video Object:', Video);
 
-    // Créer un asset vidéo vide sur Mux
+    // Créer un asset vidéo sur Mux
     const asset = await Video.Assets.create({
       input: "https://storage.googleapis.com/muxdemofiles/mux-video-intro.mp4",
       playback_policy: 'public'
     });
 
-    // Générer le lien de lecture
     const playbackUrl = `https://stream.mux.com/${asset.playback_ids[0].id}.mp4`;
 
     res.json({ videoUrl: playbackUrl });
