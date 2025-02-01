@@ -12,6 +12,16 @@ app.set("views", path.join(__dirname, "../views")); // Indiquer où se trouvent 
 // Middleware pour les fichiers statiques
 app.use(express.static(path.join(__dirname, "../public"))); // Gérer les fichiers CSS, JS, images, etc.
 
+require('dotenv').config();
+const cloudinary = require('cloudinary').v2;
+
+// Configuration de Cloudinary
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET
+});
+
 // Route principale
 app.get("/", (req, res) => {
   try {
@@ -52,42 +62,31 @@ app.get("/api/generate-video", async (req, res) => {
     }
 
     const incomePerSecond = salary / (35 * 4.33 * 3600);
-    const duration = 10; // Durée de la vidéo en secondes
+    const totalIncome = (incomePerSecond * 10).toFixed(2); // Revenu en 10 secondes
 
-    const framesDir = '/tmp/frames';
-    if (!fs.existsSync(framesDir)) fs.mkdirSync(framesDir);
+    // Génération de la vidéo avec texte via Cloudinary
+    const result = await cloudinary.uploader.upload("https://res.cloudinary.com/demo/video/upload/dog.mp4", {
+      resource_type: "video",
+      eager: [
+        { 
+          width: 800, 
+          height: 400, 
+          crop: "pad", 
+          overlay: {
+            font_family: "Arial",
+            font_size: 40,
+            text: `Revenu en 10s: ${totalIncome} €`
+          }, 
+          gravity: "south",
+          color: "#ffffff"
+        }
+      ]
+    });
 
-    // Générer les images pour chaque seconde
-    for (let i = 0; i <= duration; i++) {
-      const canvas = createCanvas(800, 400);
-      const ctx = canvas.getContext('2d');
-
-      ctx.fillStyle = 'black';
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-      ctx.fillStyle = 'white';
-      ctx.font = '40px Arial';
-      ctx.fillText(`Temps : ${i}s`, 50, 150);
-      ctx.fillText(`Revenu : ${(incomePerSecond * i).toFixed(2)} €`, 50, 250);
-
-      const buffer = canvas.toBuffer('image/png');
-      fs.writeFileSync(path.join(framesDir, `frame${i}.png`), buffer);
-    }
-
-    const outputPath = '/tmp/income_video.mp4';
-    ffmpeg()
-      .input(path.join(framesDir, 'frame%d.png'))
-      .inputFPS(1)
-      .outputFPS(25)
-      .output(outputPath)
-      .on('end', () => {
-        fs.rmSync(framesDir, { recursive: true, force: true });
-        res.download(outputPath); 
-      })
-      .run();
+    res.json({ videoUrl: result.secure_url });
 
   } catch (error) {
-    console.error("Error generating video: ", error);
+    console.error("Error generating video:", error);
     res.status(500).json({ error: "Internal Server Error" });
   }
 });
