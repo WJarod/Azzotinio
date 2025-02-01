@@ -44,7 +44,6 @@ app.get("/api/calculate", (req, res) => {
   }
 });
 
-// Route pour générer une vidéo de décompte des revenus
 app.get("/api/generate-video", async (req, res) => {
   try {
     const salary = parseFloat(req.query.salary);
@@ -55,7 +54,7 @@ app.get("/api/generate-video", async (req, res) => {
     const incomePerSecond = salary / (35 * 4.33 * 3600);
     const duration = 10; // Durée de la vidéo en secondes
 
-    const framesDir = path.join(__dirname, '../frames');
+    const framesDir = '/tmp/frames';
     if (!fs.existsSync(framesDir)) fs.mkdirSync(framesDir);
 
     // Générer les images pour chaque seconde
@@ -75,7 +74,7 @@ app.get("/api/generate-video", async (req, res) => {
       fs.writeFileSync(path.join(framesDir, `frame${i}.png`), buffer);
     }
 
-    const outputPath = path.join(__dirname, '../public', 'income_video.mp4');
+    const outputPath = '/tmp/income_video.mp4';
     ffmpeg()
       .input(path.join(framesDir, 'frame%d.png'))
       .inputFPS(1)
